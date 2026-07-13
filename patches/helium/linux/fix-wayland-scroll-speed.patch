@@ -1,0 +1,26 @@
+--- a/ui/ozone/platform/wayland/host/wayland_pointer.cc
++++ b/ui/ozone/platform/wayland/host/wayland_pointer.cc
+@@ -7,6 +7,7 @@
+ #include <linux/input.h>
+ #include <wayland-util.h>
+ 
++#include <stdlib.h>
+ #include <optional>
+ 
+ #include "base/logging.h"
+@@ -251,6 +252,15 @@
+                                 std::optional<base::TimeTicks> timestamp,
+                                 bool is_high_resolution) {
+   gfx::Vector2dF offset;
++
++  // Allow scroll speed to be configured via environment variable
++  double multiplier = 0.35; // Default sweet spot
++  const char* env_speed = getenv("HELIUM_SCROLL_SPEED");
++  if (env_speed) {
++    multiplier = atof(env_speed);
++  }
++  delta = delta * multiplier;
++
+   if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
+     offset.set_y(delta);
+   } else if (axis == WL_POINTER_AXIS_HORIZONTAL_SCROLL) {
